@@ -3,6 +3,8 @@ import time
 import json
 from urllib.parse import urlencode, urlparse, parse_qsl
 from lutris import settings
+from lutris import pga
+from lutris.util.strings import slugify
 from lutris.util.http import Request
 from lutris.util.log import logger
 from lutris.util.cookies import WebkitCookieJar
@@ -166,6 +168,23 @@ def disconnect(parent=None):
     service = GogService()
     service.remove_token()
     parent.emit('update-service', 'gog')
+
+
+def sync_with_lutris():
+    if not is_connected():
+        return
+    service = GogService()
+    gog_library = service.get_library()['products']
+
+    local_library = pga.get_games()
+    local_slugs = set([game['slug'] for game in local_library])
+
+    gog_slugs = set([slugify(game['title']) for game in gog_library])
+
+    missing_slugs = gog_slugs.difference(local_slugs)
+
+    print(json.dumps(gog_library, indent=2))
+    print(missing_slugs)
 
 
 def get_games():
