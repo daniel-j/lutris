@@ -63,7 +63,9 @@ class GogWindow(Gtk.Window):
         self.gog_service = GogService()
 
         self.game_list = self.gog_service.get_library()
-        for game in self.game_list['products']:
+
+        sorted_game_list = sorted(self.game_list['products'], key=lambda g: g['title'])
+        for game in sorted_game_list:
             self.game_listbox.add(self.get_game_box(game))
 
     def get_game_box(self, game):
