@@ -20,6 +20,7 @@ from lutris.settings import CACHE_DIR
 
 
 NAME = "Desktop games"
+SOURCES = ['Local']
 INSTALLER_SLUG = 'desktopapp'
 
 IGNORED_GAMES = (

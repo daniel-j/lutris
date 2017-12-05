@@ -10,6 +10,8 @@ from lutris.gui.dialogs import WebConnectDialog
 
 
 NAME = "GOG"
+SOURCES = ['Online']
+INSTALLER_SLUG = 'gog'
 
 
 class GogService:
@@ -81,6 +83,10 @@ class GogService:
         with open(self.token_path) as token_file:
             token_content = json.loads(token_file.read())
         return token_content
+
+    def remove_token(self):
+        os.remove(self.token_path)
+        os.remove(self.credentials_path)
 
     def get_token_age(self):
         token_stat = os.stat(self.token_path)
@@ -154,6 +160,12 @@ def connect(parent=None):
     service = GogService()
     dialog = WebConnectDialog(service, parent)
     dialog.run()
+
+
+def disconnect(parent=None):
+    service = GogService()
+    service.remove_token()
+    parent.emit('update-service', 'gog')
 
 
 def get_games():

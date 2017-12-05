@@ -7,6 +7,7 @@ from lutris.util.strings import slugify
 from lutris.config import make_game_config_id, LutrisConfig
 
 NAME = "ScummVM"
+SOURCES = ['Local']
 INSTALLER_SLUG = 'system-scummvm'
 SCUMMVM_CONFIG_FILE = os.path.join(os.path.expanduser("~/.config/scummvm"), "scummvm.ini")
 

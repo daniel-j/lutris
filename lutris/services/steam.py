@@ -10,6 +10,7 @@ from lutris.util.strings import slugify
 from lutris.config import make_game_config_id, LutrisConfig
 
 NAME = 'Steam'
+SOURCES = ['Local']
 
 APP_STATE_FLAGS = [
     "Invalid",

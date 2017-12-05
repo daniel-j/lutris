@@ -373,10 +373,11 @@ class WebConnectDialog(Dialog):
                                                      service.credentials_path,
                                                      WebKit2.CookiePersistentStorage(0))
         self.service = service
+        self.parent = parent
 
         super(WebConnectDialog, self).__init__(title=service.name, parent=parent)
         self.set_border_width(0)
-        self.set_default_size(390, 425)
+        self.set_default_size(390, 550)
 
         self.webview = WebKit2.WebView.new_with_context(self.context)
         self.webview.load_uri(service.login_url)
@@ -391,3 +392,4 @@ class WebConnectDialog(Dialog):
             if uri.startswith(self.service.redirect_uri):
                 self.service.request_token(uri)
                 self.destroy()
+                self.parent.emit('update-service', 'gog')
