@@ -62,6 +62,8 @@ class LutrisWindow(Gtk.ApplicationWindow):
     sync_button = GtkTemplate.Child()
     sync_label = GtkTemplate.Child()
     sync_spinner = GtkTemplate.Child()
+    account_popover = GtkTemplate.Child()
+    add_popover = GtkTemplate.Child()
 
     def __init__(self, application, **kwargs):
         self.runtime_updater = RuntimeUpdater()
@@ -391,12 +393,13 @@ class LutrisWindow(Gtk.ApplicationWindow):
         AsyncCall(sync_from_remote, update_gui)
 
     def open_sync_dialog(self):
+        self.add_popover.popdown()
         sync_dialog = SyncServiceDialog(parent=self)
         sync_dialog.run()
 
     def update_existing_games(self, added, updated, first_run=False):
         for game_id in updated.difference(added):
-            # XXX this migth not work if the game has no 'item' set
+            # XXX this might not work if the game has no 'item' set
             self.view.update_row(pga.get_game_by_field(game_id, 'id'))
 
         if first_run:
@@ -439,6 +442,7 @@ class LutrisWindow(Gtk.ApplicationWindow):
 
     @GtkTemplate.Callback
     def on_connect(self, *args):
+        self.account_popover.popdown()
         """Callback when a user connects to his account."""
         login_dialog = dialogs.ClientLoginDialog(self)
         login_dialog.connect('connected', self.on_connect_success)
@@ -655,6 +659,7 @@ class LutrisWindow(Gtk.ApplicationWindow):
 
     @GtkTemplate.Callback
     def on_add_game_button_clicked(self, *args):
+        self.add_popover.popdown()
         """Add a new game manually with the AddGameDialog."""
         dialog = AddGameDialog(
             self,
