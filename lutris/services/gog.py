@@ -77,7 +77,7 @@ class GogService:
 
     def load_token(self):
         if not os.path.exists(self.token_path):
-            raise RuntimeError("No GOG token available")
+            return None
         with open(self.token_path) as token_file:
             token_content = json.loads(token_file.read())
         return token_content
@@ -95,6 +95,8 @@ class GogService:
 
     def make_api_request(self, url):
         token = self.load_token()
+        if not token:
+            return None
         if self.get_token_age() > 2600:
             self.request_token(refresh_token=token['refresh_token'])
             token = self.load_token()
