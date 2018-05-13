@@ -6,6 +6,7 @@ import shlex
 import subprocess
 import json
 import shutil
+from getpass import getuser
 
 from gi.repository import GLib
 
@@ -215,8 +216,7 @@ class winebattlenet(wine.wine):
 
     def get_bnet_config(self):
         prefix = self.get_or_create_default_prefix()
-        bnet_config_dir = os.path.join(prefix, 'drive_c/users', os.getlogin(), 'Application Data/Battle.net/')
-        os.makedirs(bnet_config_dir, exist_ok=True)
+        bnet_config_dir = os.path.join(prefix, 'drive_c/users', getuser(), 'Application Data/Battle.net/')
         config_path = os.path.join(bnet_config_dir, 'Battle.net.config')
         config = {}
         if os.path.exists(config_path):
@@ -226,7 +226,7 @@ class winebattlenet(wine.wine):
 
     def set_bnet_config(self, config):
         prefix = self.get_or_create_default_prefix()
-        bnet_config_dir = os.path.join(prefix, 'drive_c/users', os.getlogin(), 'Application Data/Battle.net/')
+        bnet_config_dir = os.path.join(prefix, 'drive_c/users', getuser(), 'Application Data/Battle.net/')
         os.makedirs(bnet_config_dir, exist_ok=True)
         config_path = os.path.join(bnet_config_dir, 'Battle.net.config')
         with open(config_path, 'w') as bnet_config:
