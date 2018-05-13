@@ -159,7 +159,15 @@ class Game(object):
     def prelaunch(self):
         """Verify that the current game can be launched."""
         if not self.runner.is_installed():
-            installed = self.runner.install_dialog()
+            # clean runner config for its installation
+            try:
+                runner_class = import_runner(self.runner_name)
+            except InvalidRunner:
+                logger.error("Unable to import runner %s for %s",
+                             self.runner_name, self.slug)
+                return False
+            runner = runner_class()
+            installed = runner.install_dialog()
             if not installed:
                 return False
 
@@ -374,6 +382,9 @@ class Game(object):
             logger.debug("Game thread stopped")
             self.on_game_quit()
             return False
+
+        self.runner.beat(self.game_thread)
+
         return True
 
     def stop(self):

@@ -26,7 +26,7 @@ class CommandsMixin(object):
         raise RuntimeError("Don't instanciate this class, it's a mixin!!!!!!!!!!!!!!!!")
 
     def _get_runner_version(self):
-        if self.runner in ('wine', 'winesteam'):
+        if self.runner.startswith('wine'):
             if self.script.get(self.runner):
                 return wine.support_legacy_version(self.script[self.runner].get('version'))
         if self.runner == 'libretro':
@@ -367,7 +367,7 @@ class CommandsMixin(object):
                 value = self._substitute(data[key])
             data[key] = value
 
-        if runner_name in ['wine', 'winesteam'] and 'prefix' not in data:
+        if runner_name.startswith('wine') and 'prefix' not in data:
             data['prefix'] = self.target_path
 
         task = import_task(runner_name, task_name)

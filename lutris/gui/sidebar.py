@@ -6,6 +6,7 @@ from lutris import pga
 from lutris.gui.runnerinstalldialog import RunnerInstallDialog
 from lutris.gui.config_dialogs import RunnerConfigDialog
 from lutris.gui.runnersdialog import RunnersDialog
+from lutris.runners.runner import Runner
 from lutris.gui.widgets.utils import get_runner_icon
 
 TYPE = 0
@@ -59,6 +60,7 @@ class SidebarTreeView(Gtk.TreeView):
 
         self.connect('button-press-event', self.popup_contextual_menu)
         GObject.add_emission_hook(RunnersDialog, "runner-installed", self.update)
+        GObject.add_emission_hook(Runner, "runner-installed", self.update)
 
         self.runners = sorted(runners.__all__)
         self.platforms = sorted(platforms.__all__)

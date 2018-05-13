@@ -4,7 +4,7 @@ import os
 import platform
 import shutil
 
-from gi.repository import Gtk
+from gi.repository import GObject, Gtk
 
 from lutris import pga, settings, runtime
 from lutris.config import LutrisConfig
@@ -30,7 +30,10 @@ def get_arch():
         return 'armv7'
 
 
-class Runner:
+class Runner(GObject.GObject):
+    __gsignals__ = {
+        "runner-installed": (GObject.SIGNAL_RUN_FIRST, None, ()),
+    }
     """Generic runner (base class for other runners)."""
     multiple_versions = False
     platforms = []
@@ -44,6 +47,7 @@ class Runner:
 
     def __init__(self, config=None):
         """Initialize runner."""
+        super(Runner, self).__init__()
         self.arch = get_arch()
         self.logger = logger
         self.config = config
@@ -357,3 +361,6 @@ class Runner:
         runner_path = os.path.join(settings.RUNNER_DIR, self.name)
         if os.path.isdir(runner_path):
             shutil.rmtree(runner_path)
+
+    def beat(self, thread):
+        '''Implemented in each runner'''

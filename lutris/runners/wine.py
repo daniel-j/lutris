@@ -167,6 +167,10 @@ def winekill(prefix, arch='win32', wine_path=None, env=None, initial_pids=None):
             'WINEARCH': arch,
             'WINEPREFIX': prefix
         }
+    else:
+        env['WINEARCH'] = arch
+        env['WINEPREFIX'] = prefix
+
     command = [os.path.join(wine_root, "wineserver"), "-k"]
 
     logger.debug("Killing all wine processes: %s" % command)
@@ -276,7 +280,7 @@ def wineexec(executable, args="", wine_path=None, prefix=None, arch=None,
 
 
 def winetricks(app, prefix=None, arch=None, silent=True,
-               wine_path=None, config=None, disable_runtime=False):
+               wine_path=None, config=None, blocking=False):
     """Execute winetricks."""
     winetricks_path = os.path.join(datapath.get(), 'bin/winetricks')
     if wine_path:
@@ -290,7 +294,7 @@ def winetricks(app, prefix=None, arch=None, silent=True,
         args = "--unattended " + args
     return wineexec(None, prefix=prefix, winetricks_wine=winetricks_wine,
                     wine_path=winetricks_path, arch=arch, args=args,
-                    config=config, disable_runtime=disable_runtime)
+                    config=config, disable_runtime=True, blocking=blocking)
 
 
 def winecfg(wine_path=None, prefix=None, arch='win32', config=None):
@@ -307,11 +311,31 @@ def winecfg(wine_path=None, prefix=None, arch='win32', config=None):
                     include_processes=['winecfg.exe'])
 
 
-def joycpl(wine_path=None, prefix=None, config=None):
+def winepath(path, wine_path=None, prefix=None, arch=None, blocking=True, to_windows=False):
+    """Execute winepath."""
+    if not wine_path:
+        logger.debug("winecfg: Reverting to default wine")
+        wine_path = wine().get_executable()
+
+    winepath_path = os.path.join(os.path.dirname(wine_path), "winepath")
+    logger.debug("winepath: %s", winepath_path)
+
+    args = ''
+    if to_windows:
+        args += '-w '
+    args += shlex.quote(path)
+
+    return wineexec(None, prefix=prefix, winetricks_wine=winepath_path,
+                    wine_path=winepath_path, arch=arch, blocking=blocking,
+                    args=args, include_processes=['winepath'])
+
+
+def joycpl(wine_path=None, prefix=None):
     """Execute Joystick control panel."""
     arch = detect_arch(prefix, wine_path)
     wineexec('control', prefix=prefix,
-             wine_path=wine_path, arch=arch, args='joy.cpl')
+             wine_path=wine_path, arch=arch, args='joy.cpl',
+             include_processes=['control'])
 
 
 def eject_disc(wine_path, prefix):
@@ -911,11 +935,11 @@ class wine(Runner):
         winetricks('', prefix=self.prefix_path, wine_path=self.get_executable(), config=self)
 
     def run_joycpl(self, *args):
-        joycpl(prefix=self.prefix_path, wine_path=self.get_executable(), config=self)
+        joycpl(prefix=self.prefix_path, wine_path=self.get_executable())
+
 
     def set_wine_desktop(self, enable_desktop=False):
-        prefix = self.prefix_path
-        prefix_manager = WinePrefixManager(prefix)
+        prefix_manager = WinePrefixManager(self.prefix_path)
         path = self.reg_keys['Desktop']
 
         if enable_desktop:
@@ -1088,6 +1112,7 @@ class wine(Runner):
     @staticmethod
     def parse_wine_path(path, prefix_path=None):
         """Take a Windows path, return the corresponding Linux path."""
+        # TODO: Replace with winepath?
         if not prefix_path:
             prefix_path = os.path.expanduser("~/.wine")
 

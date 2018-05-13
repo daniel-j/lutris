@@ -298,6 +298,10 @@ class LutrisThread(threading.Thread):
                 num_watched_children += 1
         return processes, num_children, num_watched_children, terminated_children
 
+    def get_processes_list(self):
+        process = Process(self.rootpid)
+        return list(self.iter_children(process))
+
     def watch_children(self):
         """Poke at the running process(es)."""
         if not self.game_process or not self.is_running:

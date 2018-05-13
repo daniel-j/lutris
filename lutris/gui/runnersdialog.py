@@ -1,5 +1,5 @@
 # -*- coding:Utf-8 -*-
-from gi.repository import Gtk, GObject, Gdk
+from gi.repository import Gtk, GObject
 
 from lutris import runners
 from lutris import settings
@@ -161,18 +161,22 @@ class RunnersDialog(Gtk.Window):
 
     def on_install_clicked(self, widget, runner, runner_label):
         """Install a runner."""
+        def callback():
+            if runner.is_installed():
+                self.emit('runner-installed')
+                widget.hide()
+                runner_label.set_sensitive(True)
+
         if runner.depends_on is not None:
             dependency = runner.depends_on()
-            dependency.install()
+            if not dependency.is_installed():
+                dependency.install(callback=callback)
         try:
-            runner.install()
+            runner.install(callback=callback)
         except (runners.RunnerInstallationError,
                 runners.NonInstallableRunnerError) as ex:
             ErrorDialog(ex.message, parent=self)
-        if runner.is_installed():
-            self.emit('runner-installed')
-            widget.hide()
-            runner_label.set_sensitive(True)
+        callback()
 
     def on_configure_clicked(self, widget, runner, runner_label):
         config_dialog = RunnerConfigDialog(runner, parent=self)
