@@ -40,7 +40,7 @@ gamelist = {
     # 'heroes_ptr':           ('Heroes of the Storm PTR', None),
     # 'heroes_tournament':    ('Heroes of the Storm Tournament', None),
     'prometheus':           ('Overwatch', 'Overwatch.exe', 'Pro'),
-    # 'prometheus_test':      ('Overwatch PTR', 'Overwatch.exe', 'Pro'),
+    'prometheus_test':      ('Overwatch (PTR)', 'Overwatch.exe', 'Pro'),
     # 's1':                   ('Starcraft I', None),
     # 's2':                   ('Starcraft II', None, 'SC2'),
     # 'wow':                  ('World of Warcraft', None, 'WoW')
