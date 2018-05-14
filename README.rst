@@ -23,6 +23,7 @@ We currently support the following runners:
 * Web
 * Wine
 * Wine + Steam
+* Wine + Battle.net
 * Libretro
 * DOSBox
 * MAME
