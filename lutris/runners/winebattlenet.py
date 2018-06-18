@@ -286,7 +286,7 @@ class winebattlenet(wine.wine):
             prefix = self.get_or_create_default_prefix()
             prefix64 = self.get_or_create_default_prefix('win64')
             logger.debug('Installing corefonts in Battle.net win32 wineprefix, this takes a while...')
-            winetricks('corefonts fontsmooth=rgb', prefix=prefix, arch='win32', wine_path=self.get_executable(), blocking=True)
+            winetricks('eufonts fontsmooth=rgb', prefix=prefix, arch='win32', wine_path=self.get_executable(), blocking=True)
             # link some folders between the prefixes
             if prefix64 and prefix != prefix64:
                 if not os.path.islink(os.path.join(prefix64, 'drive_c/users')):
@@ -297,7 +297,7 @@ class winebattlenet(wine.wine):
                     shutil.rmtree(os.path.join(prefix64, 'drive_c/ProgramData'))
                     os.symlink(os.path.join(prefix, 'drive_c/ProgramData'), os.path.join(prefix64, 'drive_c/ProgramData'))
                 logger.debug('Installing corefonts in Battle.net win64 wineprefix, this takes a while...')
-                winetricks('corefonts fontsmooth=rgb', prefix=prefix64, arch='win64', wine_path=self.get_executable(), blocking=True)
+                winetricks('eufonts fontsmooth=rgb', prefix=prefix64, arch='win64', wine_path=self.get_executable(), blocking=True)
 
             self.set_regedit_keys()
 
@@ -481,16 +481,15 @@ class winebattlenet(wine.wine):
 
     def beat(self, thread):
         gameExe = gamelist[self.gameid][1]
-        if not self.runner_config.get('quit_bnet_on_play') or not gameExe:
-            return
         processes = thread.get_processes_list()
         names = [child.name for child in processes]
 
-        if gameExe in names and processes[names.index(gameExe)].state == 'S':
-            for child in processes:
-                if child.name in ['Agent.exe', 'Battle.net.exe'] and child.state != 'Z':
-                    logger.debug(gameExe + ' is running. Killing ' + str(child))
-                    system.kill_pid(child.pid)
+        if self.runner_config.get('quit_bnet_on_play') and gameExe:
+            if gameExe in names and processes[names.index(gameExe)].state == 'S':
+                for child in processes:
+                    if child.name in ['Agent.exe', 'Battle.net.exe'] and child.state != 'Z':
+                        logger.debug(gameExe + ' is running. Killing ' + str(child))
+                        system.kill_pid(child.pid)
 
     def shutdown(self):
         """Shutdown Battle.net in a clean way."""
