@@ -29,8 +29,9 @@ class InstallerWindow(Gtk.ApplicationWindow):
 
     def __init__(self, game_slug=None, installer_file=None, revision=None, parent=None, application=None):
         Gtk.ApplicationWindow.__init__(self, application=application)
-        self.set_default_icon_name('lutris')
         self.set_show_menubar(False)
+        self.set_default_icon_name('lutris')
+        self.set_title('Install Lutris game')
         self.interpreter = None
         self.selected_directory = None  # Latest directory chosen by user
         self.parent = parent
@@ -285,6 +286,7 @@ class InstallerWindow(Gtk.ApplicationWindow):
             default_path = self.interpreter.get_default_target()
             self.set_path_chooser(self.on_target_changed, 'folder',
                                   default_path)
+            self.continue_button.grab_focus()
             self.non_empty_label = Gtk.Label()
             self.non_empty_label.set_markup(
                 "<b>Warning!</b> The selected path "
@@ -333,7 +335,17 @@ class InstallerWindow(Gtk.ApplicationWindow):
             path = self.selected_directory
         else:
             path = os.path.expanduser('~')
-        self.set_path_chooser(None, 'file', default_path=path)
+        self.set_path_chooser(self.on_file_changed, 'file', default_path=path)
+        self.install_button.set_visible(False)
+        self.continue_button.show()
+        if self.continue_handler:
+            self.continue_button.disconnect(self.continue_handler)
+        self.continue_handler = self.continue_button.connect('clicked', self.on_file_selected)
+        self.on_file_changed(self.location_entry)
+
+    def on_file_changed(self, text_entry):
+        file_path = os.path.expanduser(text_entry.get_text())
+        self.continue_button.set_sensitive(os.path.isfile(file_path))
 
     def set_path_chooser(self, callback_on_changed, action=None,
                          default_path=None):
@@ -351,11 +363,7 @@ class InstallerWindow(Gtk.ApplicationWindow):
         self.location_entry.show_all()
         if callback_on_changed:
             self.location_entry.entry.connect('changed', callback_on_changed)
-        else:
-            self.install_button.set_visible(False)
-            self.continue_button.connect('clicked', self.on_file_selected)
-            self.continue_button.grab_focus()
-            self.continue_button.show()
+        
         self.widget_box.pack_start(self.location_entry, False, False, 0)
 
     def on_file_selected(self, widget):
@@ -369,6 +377,7 @@ class InstallerWindow(Gtk.ApplicationWindow):
 
     def start_download(self, file_uri, dest_file, callback=None, data=None, referer=None):
         self.clean_widgets()
+        self.continue_button.hide()
         logger.debug("Downloading %s to %s", file_uri, dest_file)
         self.download_progress = DownloadProgressBox(
             {'url': file_uri, 'dest': dest_file, 'referer': referer}, cancelable=True
@@ -451,12 +460,14 @@ class InstallerWindow(Gtk.ApplicationWindow):
 
         combobox.connect("changed", self.on_input_menu_changed)
         combobox.show()
+        if self.continue_handler:
+            self.continue_button.disconnect(self.continue_handler)
         self.continue_handler = self.continue_button.connect(
             'clicked', callback, alias, combobox)
         if not preselect:
             self.continue_button.set_sensitive(False)
-        self.continue_button.grab_focus()
         self.continue_button.show()
+        self.continue_button.grab_focus()
 
     def on_input_menu_changed(self, widget):
         if widget.get_active_id():
